@@ -9,13 +9,15 @@ import {
   Card,
   CardContent,
   Chip,
-  Divider,
   Grid,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import TextFieldsIcon from '@mui/icons-material/TextFields';
 
-const API_BASE = 'http://localhost:8000';
+// ✅ Use environment variable or default to Hugging Face backend
+const API_BASE =
+  process.env.REACT_APP_API_BASE_URL ||
+  'https://guruijij-medi-scan-backend.hf.space';
 
 function PrescriptionOCR() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -31,18 +33,15 @@ function PrescriptionOCR() {
       setError(null);
       setResult(null);
 
-      // Create preview
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
+      reader.onloadend = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
     }
   };
 
   const extractPrescription = async () => {
     if (!selectedImage) {
-      setError('Please select a prescription image first');
+      setError('Please select a prescription image first.');
       return;
     }
 
@@ -58,16 +57,16 @@ function PrescriptionOCR() {
         body: formData,
       });
 
+      if (!response.ok) throw new Error('Server returned an error');
       const data = await response.json();
 
-      if (data.success) {
-        setResult(data.data);
-      } else {
-        setError('Failed to extract prescription text');
-      }
+      if (data.success) setResult(data.data);
+      else setError('Failed to extract prescription text.');
     } catch (err) {
-      setError('Error connecting to server. Make sure backend is running.');
       console.error(err);
+      setError(
+        'Error connecting to server. Please make sure the backend is online.'
+      );
     } finally {
       setLoading(false);
     }
@@ -141,6 +140,7 @@ function PrescriptionOCR() {
 
       {result && (
         <Box>
+          {/* --- Patient Info --- */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
             <Grid item xs={12} md={6}>
               <Card>
@@ -158,6 +158,7 @@ function PrescriptionOCR() {
               </Card>
             </Grid>
 
+            {/* --- Doctor Info --- */}
             <Grid item xs={12} md={6}>
               <Card>
                 <CardContent>
@@ -178,6 +179,7 @@ function PrescriptionOCR() {
             </Grid>
           </Grid>
 
+          {/* --- Medicines --- */}
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -221,6 +223,7 @@ function PrescriptionOCR() {
             </CardContent>
           </Card>
 
+          {/* --- Extracted Text --- */}
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -242,6 +245,7 @@ function PrescriptionOCR() {
             </CardContent>
           </Card>
 
+          {/* --- Warnings --- */}
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -261,6 +265,7 @@ function PrescriptionOCR() {
         </Box>
       )}
 
+      {/* --- OCR Tips --- */}
       <Paper elevation={2} sx={{ p: 3, mt: 3, bgcolor: '#fff9c4' }}>
         <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
           📌 Tips for Better OCR Results
@@ -278,3 +283,4 @@ function PrescriptionOCR() {
 }
 
 export default PrescriptionOCR;
+
