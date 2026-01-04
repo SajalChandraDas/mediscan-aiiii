@@ -17,7 +17,7 @@ import TextFieldsIcon from '@mui/icons-material/TextFields';
 // ✅ Use environment variable or default to Hugging Face backend
 const API_BASE =
   process.env.REACT_APP_API_BASE_URL ||
-  'https://guruijij-medi-scan-backend.hf.space';
+  'https://sajaldas99-medi-scan-backend.hf.space;
 
 function PrescriptionOCR() {
   const [selectedImage, setSelectedImage] = useState(null);
