@@ -14,7 +14,8 @@ import {
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 
-const API_BASE = 'http://localhost:8000';
+// Use environment variable or fallback to Hugging Face Space URL
+const API_BASE = process.env.REACT_APP_API_URL || 'https://sajaldas99-medi-scan-backend.hf.space';
 
 function ImageDiagnosis() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -52,21 +53,27 @@ function ImageDiagnosis() {
       const formData = new FormData();
       formData.append('image', selectedImage);
 
+      console.log('Sending request to:', `${API_BASE}/api/diagnose-image`);
+
       const response = await fetch(`${API_BASE}/api/diagnose-image`, {
         method: 'POST',
         body: formData,
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const data = await response.json();
 
       if (data.success) {
         setResult(data.data);
       } else {
-        setError('Failed to analyze image');
+        setError(data.message || 'Failed to analyze image');
       }
     } catch (err) {
-      setError('Error connecting to server. Make sure backend is running.');
-      console.error(err);
+      console.error('Error details:', err);
+      setError(`Error connecting to server: ${err.message}. Please make sure the backend is running.`);
     } finally {
       setLoading(false);
     }
